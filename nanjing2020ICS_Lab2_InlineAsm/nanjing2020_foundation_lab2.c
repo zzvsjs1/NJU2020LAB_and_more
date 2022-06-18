@@ -8,9 +8,6 @@
 #define ARRLEN(A) (sizeof (A) / sizeof(A[0]))
 #define STRLEN(B) (ARRLEN(B) - 1)
 
-
-
-
 int64_t asm_add(int64_t a, int64_t b)
 {
     __asm__
@@ -27,7 +24,7 @@ int asm_popcnt(uint64_t x)
 {
     __asm__
     (
-        "popcnt    %[re], %[re]\n\t" // Cheating, directly using a instruction :).
+        "popcnt    %[re], %[re]\n\t" // Cheating :).
         : [re] "+r" (x)
     );
 
@@ -80,23 +77,33 @@ typedef JmpBufferStruct asm_jmp_buf[1];
 
 static asm_jmp_buf jmpBuffer;
 
+#define RBX (8 * 0)
+#define RBP (8 * 1)
+
+
+
+#define STR_HELP(MM) #MM
+#define TO_STR(M) STR_HELP(M)
+#define OFFSET_(REG) TO_STR(REG)
+
+
 int asm_setjmp(asm_jmp_buf env)
 {
 	__asm__ volatile
 	(
-		"movq	%%rbx,	(%[buffer])			\n\t"
-		"movq	%%rbp,	8(%[buffer])		\n\t"
+		"movq	%%rbx,	" OFFSET_(RBX) "(%[buffer])			\n\t"
+		"movq	%%rbp,	" OFFSET_(RBP) "(%[buffer])			\n\t"
 
-		"movq	%%r12,	16(%[buffer])		\n\t"
-		"movq	%%r13,	24(%[buffer])		\n\t"
-		"movq	%%r14,	32(%[buffer])		\n\t"
-		"movq	%%r15,	40(%[buffer])		\n\t"
+		"movq	%%r12,	(8 * 2)(%[buffer])		\n\t"
+		"movq	%%r13,	(8 * 3)(%[buffer])		\n\t"
+		"movq	%%r14,	(8 * 4)(%[buffer])		\n\t"
+		"movq	%%r15,	(8 * 5)(%[buffer])		\n\t"
 
 		"lea	8(%%rsp),	%%rdx			\n\t"
-		"movq	%%rdx,		48(%[buffer])	\n\t"
+		"movq	%%rdx,		(8 * 6)(%[buffer])	\n\t"
 
 		"movq	(%%rsp),	%%rax			\n\t"
-		"movq	%%rax,		56(%[buffer]) 	\n\t"
+		"movq	%%rax,		(8 * 7)(%[buffer]) 	\n\t"
 
 		:	[buffer] "+r" (env)
 		:
@@ -144,16 +151,6 @@ void bb()
 void aa()
 {
 	bb();
-}
-
-void test()
-{
-	__asm__
-	(	
-		"movq (%rsp), %rax \n\t"
-		"addq $8, %rsp\n\t"
-		"jmp *%rax\n\t"
-	);
 }
 
 int main()
