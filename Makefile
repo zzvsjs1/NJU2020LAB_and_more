@@ -1,13 +1,5 @@
 GCC = gcc
-CC_FLAGS = -Wall -Wextra -std=c17
-
-CC_OP_FLAG = -O1
-
-#CC_OP_FLAG = -g -fsanitize=address -fsanitize=leak -fsanitize=undefined -fsanitize=float-divide-by-zero -fsanitize=float-cast-overflow
-
-#CC_OP_FLAG = -g 
-
-CC_FLAG_DEPENDENCIES = -MD
+CC_FLAGS += -Wall -Wextra -std=c17
 
 MAKEFLAGS += -j3
 
@@ -19,17 +11,17 @@ OBJS = $(patsubst %.c,%.o,$(wildcard $(SRC)))
 
 .default: all
 
-all: test 
+all: bin 
 
 clean:
-	@rm -rf a;
+	@rm -f $(PROGRAM_NAME);
 	@find ./ -type f \( -iname \*.o -o -iname \*.d -o -iname \*.S \) -delete;
 
-test: $(SRC:%.c=%.o)
-	$(GCC) $(CC_OP_FLAG) $(CC_FLAGS) $^ -o a
+bin: $(SRC:%.c=%.o)
+	$(GCC) $(CC_OP_FLAG) $(CC_FLAGS) $^ -o $(PROGRAM_NAME)
 
 %.o: %.c
-	$(GCC) $(CC_FLAGS) $(CC_OP_FLAG) $(CC_FLAG_DEPENDENCIES) -c $*.c -o $*.o
-	$(GCC) $(CC_FLAGS) $(CC_OP_FLAG) $(CC_FLAG_DEPENDENCIES) -S $*.c -o $*.S
+	$(GCC) $(CC_FLAGS) $(PROGRAM_DEBUG_FLAG) $(PROGRAM_OP_FLAG) $(PROGRAM_SANITIZE_FLAG) -MD -c $*.c -o $*.o
+	$(GCC) $(CC_FLAGS) $(ASM_DEBUG_FLAG) $(ASM_OP_FLAG) -MD -S $*.c -o $*.S
 
 -include $(SRC:%.c=%.d)
