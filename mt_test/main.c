@@ -2,9 +2,9 @@
 
 void print(int i)
 {
-    while (1)
+    while (true)
     {
-        printf("Hello %d\n", i);
+        printf("Hello thread %d!\n", i);
     }
 }
 

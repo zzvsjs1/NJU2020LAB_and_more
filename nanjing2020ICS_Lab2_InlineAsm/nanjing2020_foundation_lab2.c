@@ -79,8 +79,12 @@ static asm_jmp_buf jmpBuffer;
 
 #define RBX (8 * 0)
 #define RBP (8 * 1)
-
-
+#define R12 (8 * 2)
+#define R13 (8 * 3)
+#define R14 (8 * 4)
+#define R15 (8 * 5)
+#define RSP (8 * 6)
+#define RIP (8 * 7)
 
 #define STR_HELP(MM) #MM
 #define TO_STR(M) STR_HELP(M)
@@ -91,19 +95,21 @@ int asm_setjmp(asm_jmp_buf env)
 {
 	__asm__ volatile
 	(
+		// Back up all registers.
 		"movq	%%rbx,	" OFFSET_(RBX) "(%[buffer])			\n\t"
 		"movq	%%rbp,	" OFFSET_(RBP) "(%[buffer])			\n\t"
+		"movq	%%r12,	" OFFSET_(R12) "(%[buffer])			\n\t"
+		"movq	%%r13,	" OFFSET_(R13) "(%[buffer])		\n\t"
+		"movq	%%r14,	" OFFSET_(R14) "(%[buffer])		\n\t"
+		"movq	%%r15,	" OFFSET_(R15) "(%[buffer])		\n\t"
 
-		"movq	%%r12,	(8 * 2)(%[buffer])		\n\t"
-		"movq	%%r13,	(8 * 3)(%[buffer])		\n\t"
-		"movq	%%r14,	(8 * 4)(%[buffer])		\n\t"
-		"movq	%%r15,	(8 * 5)(%[buffer])		\n\t"
-
+		// Get the stack pointer after return.
 		"lea	8(%%rsp),	%%rdx			\n\t"
-		"movq	%%rdx,		(8 * 6)(%[buffer])	\n\t"
+		"movq	%%rdx,		" OFFSET_(RSP) "(%[buffer])	\n\t"
 
+		// Get the next instruction's pointer from stack.
 		"movq	(%%rsp),	%%rax			\n\t"
-		"movq	%%rax,		(8 * 7)(%[buffer]) 	\n\t"
+		"movq	%%rax,		" OFFSET_(RIP) "(%[buffer]) 	\n\t"
 
 		:	[buffer] "+r" (env)
 		:
@@ -116,23 +122,23 @@ void __attribute__((noreturn)) asm_longjmp(asm_jmp_buf env, int val)
 {
     __asm__ volatile
 	(
-		"movq	(%[buffer]), %%rbx		\n\t"
-		"movq	8(%[buffer]), %%rbp		\n\t"
-	
-		"movq	16(%[buffer]), %%r12	\n\t"
-		"movq	24(%[buffer]), %%r13	\n\t"
-		"movq	32(%[buffer]), %%r14	\n\t"
-		"movq	40(%[buffer]), %%r15	\n\t"
+		// Restore all registers
+		"movq	" OFFSET_(RBX) "(%[buffer]), %%rbx		\n\t"
+		"movq	" OFFSET_(RBP) "(%[buffer]), %%rbp		\n\t"
+		"movq	" OFFSET_(R12) "(%[buffer]), %%r12		\n\t"
+		"movq	" OFFSET_(R13) "(%[buffer]), %%r13		\n\t"
+		"movq	" OFFSET_(R14) "(%[buffer]), %%r14		\n\t"
+		"movq	" OFFSET_(R15) "(%[buffer]), %%r15		\n\t"
+		"movq	" OFFSET_(RSP) "(%[buffer]), %%rsp		\n\t"
+		"movq	" OFFSET_(RIP) "(%[buffer]), %%rdx		\n\t"
 
-		"movq	48(%[buffer]), %%rsp	\n\t"
-		"movq	56(%[buffer]), %%rdx	\n\t"
+		// If val == 0, the return value will be set to 1.
+		"movq	$1, %%rax								\n\t"
+		"cmpl		$0, %[val]							\n\t"
+		"cmovnel	%[val], %%eax						\n\t"
 
-		"movq	$1, %%rax				\n\t"
-
-		"cmpl		$0, %[val]			\n\t"
-		"cmovnel	%[val], %%eax		\n\t"
-
-		"jmp		*%%rdx				\n\t"
+		// Set rip to the backup value.
+		"jmp		*%%rdx								\n\t"
 		:	
 		:	[buffer] "r" (env),
 			[val] "rm" (val)

@@ -5,6 +5,7 @@
 #include <assert.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <stdbool.h>
 
 #define NTHREAD (64)
 
