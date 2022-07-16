@@ -55,6 +55,7 @@ void fish_before(char ch)
 		// can proceed only if (next(ch) && quota)
 		pthread_cond_wait(&cond, &lk);
 	}
+
 	quota--;
 	pthread_mutex_unlock(&lk);
 }
@@ -78,7 +79,9 @@ void fish_thread(int id)
 	while (1)
 	{
 		fish_before(role);
-		putchar(role); // can be long; no lock protection
+		
+		// can be long; no lock protection
+		putchar(role); 
 		fish_after(role);
 	}
 }
