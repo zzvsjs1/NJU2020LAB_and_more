@@ -59,7 +59,7 @@ void fish_before(char ch)
 	pthread_mutex_unlock(&lk);
 }
 
-void fish_after(char ch)
+void fish_after(const char ch)
 {
 	pthread_mutex_lock(&lk);
 	quota++;
