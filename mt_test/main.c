@@ -1,21 +1,27 @@
+#include <stdbool.h>
 #include "thread.h"
 
-int a = 5, b = 6;
 
-void print(int i)
+void Tproduce(const int id)
 {
-    atomic_fetch_add
-    a++;   
+    while (true)
+    {
+        printf("(");
+    }   
 }
 
-int main()
+void Tconsume(const int id)
 {
-    create(print);
-    create(print);
+    while (true)
+    {
+        printf("(");
+    }   
+}
 
-    join();
 
-    printf("%d\n", a);
+int main(int argc, const char* argv[])
+{
     
+
     return 0;
 }

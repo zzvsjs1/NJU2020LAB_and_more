@@ -18,7 +18,7 @@ clean:
 	@find ./ -type f \( -iname \*.o -o -iname \*.d -o -iname \*.S \) -delete;
 
 bin: $(SRC:%.c=%.o)
-	$(GCC) $(CC_OP_FLAG) $(CC_FLAGS) $(PROGRAM_SANITIZE_FLAG) $^ -o $(PROGRAM_NAME)
+	$(GCC) $(CC_OP_FLAG) $(CC_FLAGS) $(LIB_FLAGS) $(PROGRAM_SANITIZE_FLAG) $^ -o $(PROGRAM_NAME)
 
 %.o: %.c
 	$(GCC) $(CC_FLAGS) $(PROGRAM_DEBUG_FLAG) $(PROGRAM_OP_FLAG) $(PROGRAM_SANITIZE_FLAG) -MD -c $*.c -o $*.o

@@ -37,3 +37,4 @@
 *.json
 
 .a
+/mt_test/.idea

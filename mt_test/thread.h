@@ -1,3 +1,6 @@
+#ifndef T_H
+#define T_h
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -68,3 +71,5 @@ __attribute__((destructor)) void cleanup()
 {
     join();
 }
+
+#endif
